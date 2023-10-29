@@ -8,35 +8,42 @@ select
     count(txn_type) transaction_count
 from 	
 	raw.transactions
-group by txn_type;
+group by txn_type, ticker
+having ticker = 'BTC'
 """
 
 question_two = """
 select 
-	extract('Year' from to_date(txn_date, 'YYYY/MM/DD')) txn_year,
+	extract('Year' from txn_date::date) txn_year,
 	txn_type,
 	count(txn_time) txn_count,
 	sum(quantity) total_quantity,
 	avg(quantity) average_quantity
 from raw.transactions
-group by 1, 2
+group by 1, 2, ticker
+having ticker = 'BTC'
 order by 1;
 """
-#midway
+
 question_three = """
+with transaction_table as (
+select 
+        txn_type,
+        ticker,
+        extract(month from txn_date::date) calendar_num,
+        to_char(to_date(txn_date, 'YYYY/MM/DD'), 'Mon') calendar_month,
+        extract(Year from txn_date::date)  calendar_year
+ from raw.transactions
+ where ticker = 'ETH' and extract('Year' from txn_date::date) = 2020
+)
+
 select
     calendar_month,
     sum(case when txn_type = 'BUY' then 1 else 0 end) buy_quantity,
     sum(case when txn_type = 'SELL' then 1 else 0 end) sell_quantity
-from 
-	(select 
-        txn_type,
-        ticker,
-        to_char(to_date(txn_date, 'YYYY/MM/DD'), 'Mon') calendar_month,
-        extract('Year' from to_date(txn_date, 'YYYY/MM/DD')) calendar_year
-    from raw.transactions
-    where ticker = 'ETH' and extract('Year' from to_date(txn_date, 'YYYY/MM/DD')) = 2020)
-group by 1;
+from transaction_table 
+group by calendar_month, calendar_num
+order by calendar_num;
 """
 
 question_four = """
