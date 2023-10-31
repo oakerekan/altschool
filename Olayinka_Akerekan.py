@@ -39,8 +39,8 @@ select
 
 select
     calendar_month,
-    sum(case when txn_type = 'BUY' then 1 else 0 end) buy_quantity,
-    sum(case when txn_type = 'SELL' then 1 else 0 end) sell_quantity
+    sum(case when txn_type = 'BUY' then quantity else 0 end) buy_quantity,
+    sum(case when txn_type = 'SELL' then quantity else 0 end) sell_quantity
 from transaction_table 
 group by calendar_month, calendar_num
 order by calendar_num;
